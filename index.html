@@ -1,0 +1,1235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DIYA.EXE: Character Profile: Still Unlocking New Levels</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --hud-h:56px;
+    --ivory:#FBF7F1;
+    --paper:#FFFDFB;
+    --blush:#F3DEE1;
+    --blush-deep:#E6B8C3;
+    --lavender:#E7E1F3;
+    --lavender-deep:#C9BCE6;
+    --sage:#AEBFA3;
+    --gold:#C9A667;
+    --gold-deep:#A9803F;
+    --ink:#3B2E36;
+    --ink-soft:rgba(59,46,54,0.66);
+    --ink-faint:rgba(59,46,54,0.42);
+    --line:rgba(59,46,54,0.12);
+    --glass:rgba(255,255,255,0.55);
+    --glass-strong:rgba(255,255,255,0.78);
+    --font-display:'Fraunces', serif;
+    --font-body:'Manrope', sans-serif;
+    --shadow-soft:0 10px 34px rgba(59,46,54,0.08);
+    --shadow-lift:0 18px 44px rgba(59,46,54,0.14);
+  }
+
+  *{box-sizing:border-box;}
+  html, body{height:100%; overscroll-behavior:none;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(ellipse at 15% 0%, var(--lavender) 0%, transparent 45%),
+      radial-gradient(ellipse at 85% 20%, var(--blush) 0%, transparent 50%),
+      var(--ivory);
+    color:var(--ink);
+    font-family:var(--font-body);
+    line-height:1.5;
+    overflow:hidden;
+    height:100vh;
+    height:100dvh;
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.001ms !important; animation-iteration-count:1 !important; transition-duration:0.001ms !important; scroll-behavior:auto !important;}
+  }
+  a{color:inherit;}
+  button{font-family:inherit;}
+  :focus-visible{outline:2px solid var(--gold-deep); outline-offset:3px; border-radius:6px;}
+  ::selection{background:var(--blush-deep); color:var(--ink);}
+
+  .serif{font-family:var(--font-display);}
+  em{font-style:italic; color:var(--gold-deep);}
+
+  /* ---------- HUD ---------- */
+  .hud{
+    position:fixed; top:0; left:0; right:0; z-index:100;
+    height:var(--hud-h);
+    display:flex; align-items:center; gap:18px;
+    padding:0 26px;
+    background:var(--glass-strong);
+    backdrop-filter:blur(16px);
+    border-bottom:1px solid var(--line);
+  }
+  .hud-logo{
+    font-family:var(--font-display); font-style:italic; font-weight:500;
+    font-size:16px; color:var(--ink); flex-shrink:0; white-space:nowrap; cursor:pointer;
+  }
+  .hud-logo span{color:var(--gold-deep); font-style:normal; font-family:var(--font-body); font-weight:700; font-size:11px; letter-spacing:1.5px; margin-left:6px; vertical-align:middle;}
+  .hud-mid{flex:1; display:flex; align-items:center; gap:14px; min-width:0;}
+  .quest-track{
+    flex:1; height:8px; border-radius:6px;
+    background:rgba(59,46,54,0.08);
+    position:relative; overflow:hidden;
+  }
+  .quest-fill{
+    height:100%; width:0%; border-radius:6px;
+    background:linear-gradient(90deg, var(--blush-deep), var(--lavender-deep), var(--gold));
+    transition:width 0.5s cubic-bezier(.4,0,.2,1);
+  }
+  .quest-label{
+    font-size:11px; font-weight:700; letter-spacing:1px; color:var(--ink-soft);
+    white-space:nowrap; min-width:96px; text-align:right;
+  }
+  .pips{display:flex; gap:6px; flex-shrink:0;}
+  .pip{
+    width:24px; height:24px; border-radius:50%;
+    border:1px solid var(--line); background:var(--paper);
+    color:var(--ink-faint); font-size:10px; font-weight:700;
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer; transition:all 0.25s ease;
+  }
+  .pip.done{background:var(--gold); border-color:var(--gold); color:#fff;}
+  .pip.active{border-color:var(--gold-deep); color:var(--gold-deep); box-shadow:0 0 0 4px rgba(201,166,103,0.18); transform:scale(1.12);}
+  @media (max-width:780px){
+    :root{--hud-h:50px;}
+    .hud{gap:8px; padding:0 12px;}
+    .hud-logo{font-size:12px;} .hud-logo span{display:none;}
+    .quest-label{font-size:9px; min-width:60px;}
+    .pips{gap:3px;} .pip{width:18px; height:18px; font-size:8px;}
+  }
+
+  /* ---------- BADGE SHELF ---------- */
+  .badge-shelf{
+    position:fixed; left:18px; bottom:18px; z-index:90;
+    display:flex; flex-direction:column-reverse; gap:8px;
+  }
+  .badge{
+    width:44px; height:44px; border-radius:50%;
+    background:var(--glass-strong); backdrop-filter:blur(10px);
+    border:1px solid var(--gold); display:flex; align-items:center; justify-content:center;
+    font-size:18px; box-shadow:var(--shadow-soft);
+    animation:badge-in 0.5s cubic-bezier(.34,1.56,.64,1);
+  }
+  @keyframes badge-in{from{transform:scale(0) rotate(-30deg); opacity:0;} to{transform:scale(1) rotate(0); opacity:1;}}
+  @media (max-width:780px){.badge-shelf{left:10px; bottom:10px;} .badge{width:36px; height:36px; font-size:15px;}}
+
+  /* ---------- TOASTS ---------- */
+  .toast-stack{position:fixed; bottom:18px; right:18px; z-index:200; display:flex; flex-direction:column; gap:10px; max-width:min(320px, calc(100vw - 36px));}
+  .toast{
+    background:var(--glass-strong); backdrop-filter:blur(14px);
+    border:1px solid var(--gold); border-left:4px solid var(--gold-deep);
+    border-radius:14px; padding:13px 16px; display:flex; gap:10px; align-items:flex-start;
+    box-shadow:var(--shadow-lift); animation:toast-in 0.4s cubic-bezier(.34,1.56,.64,1);
+  }
+  @keyframes toast-in{from{transform:translateX(30px) scale(0.95); opacity:0;} to{transform:translateX(0) scale(1); opacity:1;}}
+  .toast.out{animation:toast-out 0.3s ease forwards;}
+  @keyframes toast-out{to{transform:translateX(30px); opacity:0;}}
+  .toast-icon{font-size:16px; flex-shrink:0; margin-top:1px;}
+  .toast-title{font-weight:800; font-size:12px; letter-spacing:0.4px; color:var(--gold-deep); margin-bottom:2px;}
+  .toast-body{font-size:13px; color:var(--ink-soft); line-height:1.4;}
+
+  /* ---------- LAYOUT ---------- */
+  main{
+    position:fixed; top:var(--hud-h); left:0; right:0; bottom:0;
+    overflow:hidden;
+  }
+  .level-panel{
+    position:absolute; top:0; bottom:0; left:50%;
+    width:100%; max-width:1180px;
+    padding:0 24px;
+    overflow:hidden;
+    display:none;
+    flex-direction:column;
+    opacity:0;
+    transform:translate(-50%, 16px);
+    transition:opacity 0.4s ease, transform 0.4s ease;
+  }
+  .level-panel.active{display:flex;}
+  .level-panel.show{opacity:1; transform:translate(-50%, 0);}
+
+  /* Scrollable content area within each level */
+  .panel-scroll{
+    flex:1;
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+    padding:16px 0 12px;
+    scrollbar-width:thin;
+    scrollbar-color:var(--ink-faint) transparent;
+    min-height:0;
+  }
+  .panel-scroll::-webkit-scrollbar{width:4px;}
+  .panel-scroll::-webkit-scrollbar-track{background:transparent;}
+  .panel-scroll::-webkit-scrollbar-thumb{background:var(--ink-faint); border-radius:4px;}
+
+  .panel-scroll > :first-child{margin-top:0;}
+  .panel-scroll > *{max-width:100%;}
+
+  @media (max-width:780px){
+    .panel-scroll{padding:10px 0 8px;}
+    .level-panel{padding:0 16px;}
+  }
+
+  .eyebrow{
+    font-size:11px; font-weight:800; letter-spacing:2px; text-transform:uppercase;
+    color:var(--gold-deep); display:flex; align-items:center; gap:8px; margin-bottom:8px;
+    flex-shrink:0;
+  }
+  .eyebrow::before{content:''; width:20px; height:1px; background:var(--gold-deep);}
+  h1,h2,h3{font-family:var(--font-display); font-weight:600; margin:0 0 10px; color:var(--ink);}
+  h2{font-size:clamp(22px,3.5vw,36px);}
+  p{color:var(--ink-soft); max-width:100%; margin:0;}
+  .lede{font-size:13.5px; line-height:1.55;}
+  .fill{font-style:italic; color:var(--ink-faint);}
+
+  /* ---------- LEVEL NAV (Back / Continue) ---------- */
+  .level-nav{
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    padding:12px 0 16px;
+    border-top:1px solid var(--line);
+    flex-shrink:0;
+  }
+  .nav-btn{
+    display:inline-flex; align-items:center; gap:8px;
+    background:var(--paper); border:1px solid var(--line); color:var(--ink);
+    font-weight:700; font-size:12px; padding:8px 18px; border-radius:30px;
+    cursor:pointer; transition:transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  }
+  .nav-btn:hover{transform:translateY(-2px); box-shadow:var(--shadow-soft); border-color:var(--gold-deep);}
+  .nav-btn.primary{background:var(--gold-deep); border-color:var(--gold-deep); color:#fff;}
+  @media (max-width:780px){
+    .nav-btn{font-size:11px; padding:8px 14px;}
+    .level-nav{padding:10px 0 14px;}
+  }
+
+  .glass-card{
+    background:var(--glass); backdrop-filter:blur(14px);
+    border:1px solid rgba(255,255,255,0.7); border-radius:18px; box-shadow:var(--shadow-soft);
+  }
+
+  .site-footer-note{
+    text-align:center; font-size:11px; color:var(--ink-faint);
+    padding:0 0 4px;
+  }
+
+  /* ---------- LEVEL 1 (CHARACTER CREATION) ---------- */
+  .l1-grid{
+    display:grid; 
+    grid-template-columns:1fr 1fr; 
+    gap:24px; 
+    align-items:stretch; 
+    margin-top:12px; 
+    width:100%;
+  }
+  @media (max-width:880px){.l1-grid{grid-template-columns:1fr; gap:18px;}}
+  .l1-title{font-size:clamp(24px,3.8vw,36px); line-height:1.2; margin-bottom:14px;}
+
+  /* Player Stats Card */
+  .player-box{
+    padding:18px 22px;
+    border-radius:18px;
+    margin:12px 0 16px 0;
+    font-size:13px;
+  }
+  .player-header{
+    font-weight:800; font-size:20px; letter-spacing:1.5px;
+    color:var(--gold-deep); margin-bottom:12px; display:flex; align-items:center; gap:8px;
+  }
+  .player-header span:last-child{
+    font-size:16px;
+  }
+  .player-info-grid{
+    display:grid; grid-template-columns:auto 1fr; gap:6px 14px; align-items:baseline;
+  }
+  .player-key{font-weight:700; color:var(--ink); font-size:12px; letter-spacing:0.8px;}
+  .player-val{color:var(--ink-soft); font-size:13px;}
+  
+  .char-card{
+    padding:24px; 
+    display:grid; 
+    grid-template-columns:180px 1fr; 
+    gap:22px; 
+    align-items:center;
+    height:100%;
+  }
+  @media (max-width:620px){
+    .char-card{grid-template-columns:1fr; text-align:center;}
+  }
+
+  .char-portrait{
+    width:100%; 
+    height:100%; 
+    min-height:220px;
+    border-radius:16px;
+    background:radial-gradient(circle at center, rgba(255,255,255,0.8), rgba(243,222,225,0.5));
+    border:2px solid var(--paper); 
+    box-shadow:var(--shadow-soft);
+    display:flex; 
+    align-items:center; 
+    justify-content:center; 
+    overflow:hidden;
+    position:relative;
+  }
+  .char-portrait img{
+    width:100%; height:100%; object-fit:cover; display:block;
+  }
+  .char-info{
+    display:flex; 
+    flex-direction:column;
+    justify-content:center;
+    gap:8px;
+    padding:6px 0;
+  }
+  .char-name{font-family:var(--font-display); font-size:28px; margin-bottom:4px; line-height:1.2;}
+  .char-role{font-size:12px; color:var(--gold-deep); font-weight:700; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:10px;}
+  .stat-row{display:flex; flex-direction:column; gap:10px; text-align:left;}
+  .stat-top{display:flex; justify-content:space-between; font-size:12px; font-weight:700; margin-bottom:3px;}
+  .stat-track{height:8px; border-radius:6px; background:rgba(59,46,54,0.08); overflow:hidden;}
+  .stat-fill{height:100%; border-radius:6px; width:0%; background:linear-gradient(90deg, var(--gold), var(--blush-deep)); transition:width 1.1s cubic-bezier(.2,.8,.2,1);}
+
+  .l1-full-text{
+    grid-column:1 / -1;
+    margin-top:14px;
+  }
+  .l1-full-text .lede{font-size:14px; line-height:1.6;}
+
+  /* ---------- LEVEL 2 : INVENTORY ---------- */
+  .inv-grid{
+    display:grid; 
+    grid-template-columns:repeat(4,1fr); 
+    gap:12px; 
+    margin-top:16px;
+  }
+  @media (max-width:780px){
+    .inv-grid{grid-template-columns:repeat(2,1fr);}
+  }
+  @media (max-width:460px){
+    .inv-grid{grid-template-columns:1fr;}
+  }
+  .inv-item{
+    padding:16px 12px; text-align:center; cursor:pointer;
+    transition:transform 0.25s ease, box-shadow 0.25s ease;
+  }
+  .inv-item:hover{transform:translateY(-4px); box-shadow:var(--shadow-lift);}
+  .inv-frame{
+    width:56px; height:56px; margin:0 auto 10px; border-radius:14px;
+    border:1.5px dashed var(--gold-deep); background:rgba(255,255,255,0.4);
+    display:flex; align-items:center; justify-content:center; font-size:24px;
+  }
+  .inv-name{font-weight:700; font-size:12.5px;}
+  .inv-tag{font-size:10px; color:var(--ink-faint); margin-top:2px;}
+
+  .modal-overlay{
+    position:fixed; inset:0; background:rgba(59,46,54,0.35); backdrop-filter:blur(4px);
+    display:none; align-items:center; justify-content:center; z-index:300; padding:20px;
+  }
+  .modal-overlay.open{display:flex;}
+  .modal{
+    background:var(--paper); border:1px solid var(--line); border-radius:24px;
+    max-width:440px; width:100%; padding:28px; text-align:center; position:relative;
+    box-shadow:var(--shadow-lift); animation:modal-in 0.35s cubic-bezier(.34,1.56,.64,1);
+  }
+  @keyframes modal-in{from{transform:scale(0.9); opacity:0;} to{transform:scale(1); opacity:1;}}
+  .modal-close{position:absolute; top:12px; right:14px; background:none; border:none; color:var(--ink-faint); font-size:18px; cursor:pointer;}
+  .modal-frame{
+    width:76px; height:76px; margin:0 auto 12px; border-radius:18px;
+    border:1.5px dashed var(--gold-deep); background:linear-gradient(145deg, var(--blush), var(--lavender));
+    display:flex; align-items:center; justify-content:center; font-size:32px;
+  }
+  .modal-body-text{font-size:13px; color:var(--ink-soft); line-height:1.55; margin:10px auto 0; max-width:380px;}
+
+  /* ---------- INVENTORY MODAL CAROUSEL ---------- */
+  .carousel-wrap{position:relative; margin:14px auto 0; max-width:360px; border-radius:14px; overflow:hidden; background:rgba(255,255,255,0.5);}
+  .carousel-track{display:flex; transition:transform 0.4s cubic-bezier(.4,0,.2,1);}
+  .carousel-slide{min-width:100%; aspect-ratio:4/3; display:flex; align-items:center; justify-content:center; background:linear-gradient(145deg, var(--blush), var(--lavender)); border-radius:14px; font-size:13px; color:var(--ink-faint); padding:20px; text-align:center;}
+  .carousel-slide img{width:100%; height:100%; object-fit:contain; display:block; border-radius:14px;}
+  .carousel-btn{
+    position:absolute; top:50%; transform:translateY(-50%); z-index:10;
+    width:32px; height:32px; border-radius:50%; border:1px solid var(--line); background:var(--glass-strong);
+    backdrop-filter:blur(8px); color:var(--ink); font-size:14px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    transition:opacity 0.2s ease, transform 0.2s ease; opacity:0; pointer-events:none;
+  }
+  .carousel-wrap:hover .carousel-btn{opacity:1; pointer-events:auto;}
+  .carousel-btn:hover{transform:translateY(-50%) scale(1.1); border-color:var(--gold-deep); color:var(--gold-deep);}
+  .carousel-btn.prev{left:6px;}
+  .carousel-btn.next{right:6px;}
+  .carousel-dots{display:flex; justify-content:center; gap:5px; padding:8px 0 4px;}
+  .carousel-dot{width:7px; height:7px; border-radius:50%; border:none; background:var(--line); cursor:pointer; padding:0; transition:background 0.3s ease;}
+  .carousel-dot.active{background:var(--gold-deep);}
+  .carousel-empty{display:flex; align-items:center; justify-content:center; min-height:120px; color:var(--ink-faint); font-size:12px; font-style:italic;}
+  @media (max-width:480px){
+    .carousel-btn{width:28px; height:28px; font-size:12px; opacity:1; pointer-events:auto; background:rgba(255,255,255,0.85);}
+    .carousel-slide{aspect-ratio:3/2; font-size:12px;}
+  }
+
+  /* ---------- LEVEL 3 : BEAUTY LAB ---------- */
+  .lab{
+    display:flex; flex-wrap:wrap; justify-content:center; gap:20px; margin:20px 0 14px;
+  }
+  .orb-wrap{text-align:center;}
+  .orb{
+    width:90px; height:90px; border-radius:50%; cursor:pointer; border:none;
+    background:radial-gradient(circle at 35% 30%, #fff, var(--lavender) 60%, var(--blush-deep));
+    box-shadow:0 0 0 0 rgba(201,166,103,0.4), var(--shadow-soft);
+    transition:transform 0.3s ease, box-shadow 0.3s ease;
+    display:flex; align-items:center; justify-content:center; font-size:22px;
+  }
+  .orb:hover{transform:translateY(-3px) scale(1.04);}
+  .orb.lit{box-shadow:0 0 0 8px rgba(201,166,103,0.16), var(--shadow-lift); background:radial-gradient(circle at 35% 30%, #fff, var(--gold) 70%);}
+  .orb-label{margin-top:8px; font-weight:700; font-size:12px;}
+  .beauty-reveal{
+    max-width:640px; margin:10px auto 0; text-align:center; padding:20px;
+    opacity:0; max-height:0; overflow:hidden; transition:opacity 0.5s ease, max-height 0.6s ease, padding 0.5s ease;
+  }
+  .beauty-reveal.show{opacity:1; max-height:400px; padding:20px;}
+  .beauty-reveal p{margin:0 auto; max-width:520px;}
+
+  /* ---------- LEVEL 4 : MEMORY GAME ---------- */
+  .memory-hud{display:flex; gap:18px; margin:6px 0 14px; font-size:12px; font-weight:700; color:var(--ink-soft);}
+  .memory-hud strong{color:var(--gold-deep);}
+  .memory-grid{
+    display:grid; grid-template-columns:repeat(3,1fr); gap:12px;
+    max-width:420px; margin:0 auto;
+  }
+  @media (max-width:480px){
+    .memory-grid{grid-template-columns:repeat(2,1fr); max-width:280px;}
+  }
+  .mem-card{aspect-ratio:1; perspective:800px; cursor:pointer;}
+  .mem-inner{position:relative; width:100%; height:100%; transition:transform 0.5s cubic-bezier(.4,.2,.2,1); transform-style:preserve-3d;}
+  .mem-card.flipped .mem-inner, .mem-card.matched .mem-inner{transform:rotateY(180deg);}
+  .mem-face{
+    position:absolute; inset:0; border-radius:14px; backface-visibility:hidden;
+    display:flex; align-items:center; justify-content:center; overflow:hidden;
+  }
+  .mem-front{background:var(--glass-strong); border:1px solid var(--line); font-family:var(--font-display); font-size:20px; color:var(--gold-deep);}
+  .mem-back{background:#fff; border:1px solid var(--gold); transform:rotateY(180deg); padding:10px;}
+  .mem-back img{width:100%; height:100%; object-fit:contain; object-position:center; display:block;}
+  .mem-back .mem-fallback{font-size:22px; color:var(--gold-deep);}
+  .mem-card.matched .mem-back{border-color:var(--gold-deep); box-shadow:0 0 0 2px rgba(201,166,103,0.3) inset;}
+  .brand-reveal{
+    max-width:520px; margin:18px auto 0; text-align:left; padding:20px;
+    opacity:0; max-height:0; overflow:hidden; transition:opacity 0.5s ease, max-height 0.6s ease, padding 0.5s ease;
+  }
+  .brand-reveal.show{opacity:1; max-height:600px; padding:20px;}
+  .match-flag-lg{font-size:11px; font-weight:800; letter-spacing:1.5px; color:var(--gold-deep); margin-bottom:6px; text-align:center;}
+  .brand-reveal-name{font-size:21px; margin-bottom:10px; text-align:center;}
+  .brand-reveal p{font-size:13px; margin:0 0 10px; color:var(--ink-soft);}
+
+  /* ---------- LEVEL 5 : POWER UPS ---------- */
+  .power-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px; margin-top:16px;}
+  .power-card{padding:16px; transition:transform 0.25s ease;}
+  .power-card:hover{transform:translateY(-3px) rotate(-0.4deg);}
+  .power-icon{
+    width:40px; height:40px; border-radius:12px; display:flex; align-items:center; justify-content:center;
+    background:linear-gradient(140deg, var(--blush-deep), var(--gold)); font-size:18px; margin-bottom:10px;
+  }
+  .power-card h3{font-size:15px; margin-bottom:4px;}
+  .power-card p{font-size:12.5px; margin:0;}
+
+  /* ---------- LEVEL 6 : PATCH NOTES ---------- */
+  .patch{border-left:2px solid var(--line); padding-left:18px; margin-top:16px; display:flex; flex-direction:column; gap:14px;}
+  .patch-entry{position:relative;}
+  .patch-entry::before{content:'✿'; position:absolute; left:-28px; top:-2px; font-size:12px; color:var(--gold-deep);}
+  .patch-version{font-weight:800; font-size:13px; color:var(--gold-deep); margin-bottom:4px;}
+  .patch-tag{font-size:8.5px; font-weight:800; letter-spacing:1px; padding:2px 7px; border-radius:20px; background:rgba(174,191,163,0.28); color:#4C5D42; margin-right:6px;}
+  .patch p{font-size:12.5px; margin:6px 0 0;}
+  .patch-tiny{font-size:11px !important; font-style:italic; color:var(--ink-faint) !important; margin-top:6px !important;}
+  .patch-status{margin-top:18px; padding-top:14px; border-top:1px solid var(--line);}
+  .patch-status-label{font-size:11.5px; font-weight:800; letter-spacing:1px; color:var(--gold-deep); margin-bottom:8px;}
+  .patch-status-track{height:8px; border-radius:6px; background:rgba(59,46,54,0.08); overflow:hidden; max-width:320px;}
+  .patch-status-fill{height:100%; width:68%; border-radius:6px; background:linear-gradient(90deg, var(--sage), var(--gold));}
+
+  /* ---------- LEVEL 7 : BONUS ---------- */
+  .l7{text-align:center; border-radius:24px;
+    background:radial-gradient(ellipse at center, rgba(230,184,196,0.28), transparent 65%);}
+  .l7 .eyebrow{justify-content:center;} .l7 .eyebrow::before{display:none;}
+  .fact-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:10px; margin:14px 0; text-align:left;}
+  .fact-card{padding:12px; cursor:pointer;}
+  .fact-q{font-weight:700; font-size:12.5px; display:flex; justify-content:space-between; align-items:center;}
+  .fact-toggle{transition:transform 0.3s ease; flex-shrink:0;}
+  .fact-card.open .fact-toggle{transform:rotate(45deg);}
+  .fact-teaser{font-size:11.5px; color:var(--ink-soft); margin-top:5px;}
+  .fact-a{font-size:12px; margin-top:8px; max-height:0; overflow:hidden; opacity:0; transition:all 0.4s ease; line-height:1.6;}
+  .fact-card.open .fact-a{max-height:280px; opacity:1;}
+  .fact-forNow{font-style:italic; font-size:0.85em; color:var(--ink-faint);}
+
+  /* ---------- LEVEL COMPLETE ---------- */
+  .level-complete{margin-top:22px; padding:24px; text-align:center;}
+  .lc-label{font-size:11px; font-weight:800; letter-spacing:2px; color:var(--gold-deep); margin-bottom:8px;}
+  .lc-heading{font-size:clamp(19px,3vw,26px); margin-bottom:14px;}
+  .lc-badges{display:flex; flex-wrap:wrap; justify-content:center; gap:8px;}
+  .achv-tag{
+    font-size:11px; font-weight:700; white-space:nowrap;
+    background:rgba(201,166,103,0.14); border:1px solid rgba(201,166,103,0.35); color:var(--gold-deep);
+    padding:6px 12px; border-radius:20px;
+  }
+
+  /* ---------- PLAYER PHOTO ---------- */
+  .player-photo-wrap{margin:26px auto 0; text-align:center; max-width:300px;}
+  .player-photo{
+    width:100%; aspect-ratio:4/5; border-radius:20px; overflow:hidden;
+    display:flex; align-items:center; justify-content:center;
+    background:radial-gradient(circle at center, rgba(255,255,255,0.8), rgba(243,222,225,0.5));
+    border:2px solid var(--paper);
+  }
+  .player-photo img{width:100%; height:100%; object-fit:contain; display:block;}
+  .player-photo-fallback{font-size:44px;}
+  .player-photo-caption{margin-top:8px; font-size:10.5px; font-weight:800; letter-spacing:1.5px;}
+
+  /* ---------- FINAL MESSAGE ---------- */
+  .final-message{margin-top:26px; text-align:center;}
+  .final-punchline{font-size:clamp(17px,2.4vw,22px); margin:20px auto; line-height:1.6;}
+  .final-goodbye{font-size:12.5px; color:var(--ink-soft); margin-top:2px;}
+  .photo-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(100px,1fr)); gap:8px; margin:14px 0; text-align:left;}
+  .photo-frame{
+    aspect-ratio:1; border-radius:14px; border:1.5px dashed var(--gold-deep);
+    background:rgba(255,255,255,0.35); display:flex; align-items:center; justify-content:center;
+    font-size:10px; color:var(--ink-faint); text-align:center; padding:8px;
+  }
+  .closing{font-family:var(--font-display); font-style:italic; font-size:clamp(14px,2vw,18px); max-width:640px; margin:12px auto 0; color:var(--ink);}
+
+  .objective-tag{
+    display:inline-flex; align-items:center; gap:6px;
+    font-size:10.5px; font-weight:700; color:var(--gold-deep);
+    background:rgba(201,166,103,0.12); border:1px solid rgba(201,166,103,0.35);
+    padding:4px 10px; border-radius:20px; margin-bottom:10px;
+    flex-shrink:0;
+  }
+  .objective-tag .num{
+    width:14px; height:14px; border-radius:50%; background:var(--gold-deep); color:#fff;
+    font-size:8.5px; display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  }
+
+  /* ---------- BRIEF BUTTON + MODAL ---------- */
+  .brief-btn{
+    flex-shrink:0; display:flex; align-items:center; gap:6px;
+    background:var(--paper); border:1px solid var(--line); border-radius:20px;
+    padding:5px 10px; font-size:10.5px; font-weight:700; color:var(--ink-soft);
+    cursor:pointer; transition:border-color 0.2s ease, color 0.2s ease;
+  }
+  .brief-btn:hover{border-color:var(--gold-deep); color:var(--gold-deep);}
+  @media (max-width:780px){.brief-btn span.txt{display:none;}}
+  .brief-list{list-style:none; margin:0; padding:0; text-align:left; display:flex; flex-direction:column; gap:10px;}
+  .brief-list li{
+    display:flex; align-items:flex-start; gap:10px; padding:10px 12px;
+    background:rgba(255,255,255,0.5); border:1px solid var(--line); border-radius:12px; font-size:12.5px;
+  }
+  .brief-check{
+    width:18px; height:18px; border-radius:50%; flex-shrink:0; margin-top:1px;
+    border:1.5px solid var(--gold-deep); display:flex; align-items:center; justify-content:center;
+    font-size:10px; color:transparent; transition:all 0.3s ease;
+  }
+  .brief-list li.done .brief-check{background:var(--gold-deep); color:#fff;}
+  .brief-list li.done{border-color:var(--gold);}
+  .brief-q{font-weight:700; display:block;}
+  .brief-sub{color:var(--ink-faint); font-size:11px;}
+
+  /* easter egg hint */
+  .egg-hint{position:fixed; bottom:12px; left:50%; transform:translateX(-50%); font-size:10.5px; color:var(--ink-faint); z-index:80; opacity:0.7;}
+  @media (max-width:780px){.egg-hint{display:none;}}
+</style>
+</head>
+<body>
+
+<header class="hud" role="banner">
+  <div class="hud-logo">DIYA.EXE <span>STILL UNLOCKING NEW LEVELS</span></div>
+  <div class="hud-mid">
+    <div class="quest-track" aria-hidden="true"><div class="quest-fill" id="questFill"></div></div>
+    <div class="quest-label" id="questLabel">LEVEL 1 / 7</div>
+  </div>
+  <nav class="pips" id="pipRow" aria-label="Level progress"></nav>
+  <button class="brief-btn" id="briefBtn" aria-haspopup="dialog"><span>📋</span><span class="txt">Brief</span></button>
+</header>
+
+<div class="modal-overlay" id="briefModal">
+  <div class="modal" style="max-width:520px; text-align:left;">
+    <button class="modal-close" id="briefModalClose" aria-label="Close">✕</button>
+    <div class="eyebrow" style="justify-content:flex-start;">The Mission</div>
+    <h3 class="serif" style="margin-bottom:6px;">L'Oréal's 7 questions, answered</h3>
+    <p style="font-size:12.5px; margin-bottom:14px;">Every level on this site exists to answer one required question from the brief. Here is the map: ticks fill in as you play.</p>
+    <ul class="brief-list" id="briefList"></ul>
+  </div>
+</div>
+
+<div class="badge-shelf" id="badgeShelf" aria-hidden="true"></div>
+
+<main>
+
+  <!-- LEVEL 1 -->
+  <section class="l1 level-panel" id="level-1" data-level="1" data-title="Character Creation">
+    <div class="panel-scroll">
+      <div class="eyebrow">Level 1 · Character Creation</div>
+      <div class="objective-tag"><span class="num">1</span> ME, IN A NUTSHELL</div>
+      
+      <div class="l1-grid">
+        <!-- Left Column: Title & Profile Box -->
+        <div>
+          <h1 class="l1-title serif">A new character has entered the game.<br><em>Loading Diya...</em></h1>
+          
+          <div class="player-box glass-card">
+            <div class="player-header"><span>PLAYER FOUND</span><span>✅</span></div>
+            <div class="player-info-grid">
+              <span class="player-key">NAME:</span><span class="player-val">Diya</span>
+              <span class="player-key">AGE:</span><span class="player-val">22</span>
+              <span class="player-key">STATUS:</span><span class="player-val">Still figuring it out ✨</span>
+              <span class="player-key">INVENTORY:</span><span class="player-val">Weirdly full 🎒</span>
+              <span class="player-key">MAIN SKILL:</span><span class="player-val">Getting curious about random things 🔍</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column: Character Card -->
+        <div class="char-card glass-card">
+          <div class="char-portrait">
+            <img src="images/profile/image.png" alt="Diya" onerror="this.replaceWith(Object.assign(document.createElement('div'),{textContent:'🌸',style:'font-size:42px'}))">
+          </div>
+          <div class="char-info">
+            <div class="char-name serif">Diya</div>
+            <div class="char-role">CLASS: MULTICLASS CHARACTER • LEVEL ∞</div>
+            <div class="stat-row" id="statRow">
+              <div class="stat"><div class="stat-top"><span>🔍 Curiosity</span><span>92%</span></div><div class="stat-track"><div class="stat-fill" data-value="92"></div></div></div>
+              <div class="stat"><div class="stat-top"><span>🎨 Creativity</span><span>95%</span></div><div class="stat-track"><div class="stat-fill" data-value="95"></div></div></div>
+              <div class="stat"><div class="stat-top"><span>⏳ Patience</span><span>74%</span></div><div class="stat-track"><div class="stat-fill" data-value="74"></div></div></div>
+              <div class="stat"><div class="stat-top"><span>😄 Humour</span><span>88%</span></div><div class="stat-track"><div class="stat-fill" data-value="88"></div></div></div>
+              <div class="stat"><div class="stat-top"><span>💭 Overthinking</span><span>97%</span></div><div class="stat-track"><div class="stat-fill" data-value="97"></div></div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Spans Full Width Across Both Columns -->
+        <div class="l1-full-text">
+          <p class="lede">Hi, I’m Diya: engineer by degree 🎓, MBA student by current plot twist 💡, and living proof that one person can have unnecessarily many hobbies. I solve puzzles for fun 🧩, make tiny things that nobody technically needs, turn floors into rangolis 🎨, occasionally turn ingredients into dinner 🍲, and consider board games 🎲 a perfectly reasonable way to test friendships. I swim when my brain needs a reboot 🏊, play badminton when I need to remember I’m competitive 🏸, and say yes to trips ✈️, volunteering and new places because apparently my calendar enjoys chaos. I like collecting experiences more than souvenirs, although I’m not above bringing those home too. ✨</p>
+          
+          <p style="margin-top:8px;"><em class="serif" style="font-size:15px; color:var(--ink);">“I’ve always wanted to try this…”</em> - the sentence responsible for most of my hobbies.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="level-nav">
+      <span></span>
+      <button class="nav-btn primary" data-goto="2">Continue ▸</button>
+    </div>
+  </section>
+
+  <!-- LEVEL 2 -->
+  <section class="level-panel" id="level-2" data-level="2" data-title="Inventory">
+    <div class="panel-scroll">
+      <div class="eyebrow">Level 2 · Inventory</div>
+      <div class="objective-tag"><span class="num">2</span> Answers: "Your Passions"</div>
+      <h2 class="serif">Things I've collected along the way</h2>
+      <p class="lede">Some started as hobbies. Some started as "I wonder if I can make that?" A few have somehow become permanent residents. Tap around: this is the stuff that fills my very full inventory.</p>
+      <div class="inv-grid" id="invGrid"></div>
+    </div>
+    <div class="level-nav">
+      <button class="nav-btn" data-goto="1">◂ Back</button>
+      <button class="nav-btn primary" data-goto="3">Continue ▸</button>
+    </div>
+  </section>
+
+  <div class="modal-overlay" id="invModal">
+    <div class="modal">
+      <button class="modal-close" id="invModalClose" aria-label="Close">✕</button>
+      <div class="modal-frame" id="invModalFrame">🧩</div>
+      <!-- Carousel replaces the icon when photos exist -->
+      <div class="carousel-wrap" id="invCarousel" style="display:none;">
+        <div class="carousel-track" id="carouselTrack"></div>
+        <button class="carousel-btn prev" id="carouselPrev">◂</button>
+        <button class="carousel-btn next" id="carouselNext">▸</button>
+        <div class="carousel-dots" id="carouselDots"></div>
+      </div>
+      <h3 class="serif" id="invModalName">Item name</h3>
+      <div class="modal-body-text" id="invModalDesc"></div>
+    </div>
+  </div>
+
+  <!-- LEVEL 3 -->
+  <section class="level-panel" id="level-3" data-level="3" data-title="Beauty Lab">
+    <div class="panel-scroll">
+      <div class="eyebrow">Level 3 · The Beauty Lab</div>
+      <div class="objective-tag"><span class="num">3</span> Unlocking My Definition Of Beauty</div>
+      <h2 class="serif">What does beauty mean to you?</h2>
+      <p class="lede">Three little clues. Tap each one: they'll tell you what I notice when I call something beautiful.</p>
+      <div class="lab" id="labOrbs">
+        <div class="orb-wrap"><button class="orb" data-orb="kindness">🫶</button><div class="orb-label">Kindness</div></div>
+        <div class="orb-wrap"><button class="orb" data-orb="creativity">✨</button><div class="orb-label">Creativity</div></div>
+        <div class="orb-wrap"><button class="orb" data-orb="authenticity">🌱</button><div class="orb-label">Authenticity</div></div>
+      </div>
+      <div class="beauty-reveal glass-card" id="beautyReveal">
+        <p class="serif" style="font-style:italic; font-size:16px; color:var(--ink);">"To me, beauty is a feeling before it is a look. Beauty is not one ideal to fit into, but the freedom to express who you are. It is the kindness you feel, the creativity to see the world in your own way, and the confidence to be authentically yourself. Beauty becomes meaningful when it feels real, not perfect."</p>
+      </div>
+    </div>
+    <div class="level-nav">
+      <button class="nav-btn" data-goto="2">◂ Back</button>
+      <button class="nav-btn primary" data-goto="4">Continue ▸</button>
+    </div>
+  </section>
+
+  <!-- LEVEL 4 -->
+  <section class="level-panel" id="level-4" data-level="4" data-title="Brand Match">
+    <div class="panel-scroll">
+      <div class="eyebrow">Level 4 · Brand Match</div>
+      <div class="objective-tag"><span class="num">4</span> Answers: "One L'Oréal Brand You Relate To Most - And Why"</div>
+      <h2 class="serif">Match the memory, find the brand</h2>
+      <p class="lede">Flip two cards at a time. Match all three pairs to unlock the brand that feels like home.</p>
+      <div class="memory-hud">
+        <div>MOVES <strong id="memMoves">0</strong></div>
+        <div>PAIRS <strong id="memPairs">0</strong>/3</div>
+      </div>
+      <div class="memory-grid" id="memoryGrid"></div>
+      <div class="brand-reveal glass-card" id="brandReveal">
+        <div class="match-flag-lg">✨ MATCH FOUND</div>
+        <div class="brand-reveal-name serif">L'ORÉAL PARIS</div>
+        <p>L'Oréal Paris is the brand I relate to most because it makes beauty feel personal rather than prescriptive. I love the idea that beauty can change with your mood, your style and your confidence, without asking you to fit into one definition of it.</p>
+        <p>And honestly, the Extraordinary Oil Serum makes the connection even more real for me. I genuinely love it, so this isn't just a brand I admire; it's one that has already found a place in my everyday life.</p>
+        <p style="margin-bottom:0;">For me, "Because You're Worth It" isn't about being perfect. It's about feeling like yourself, and knowing that's enough.</p>
+      </div>
+    </div>
+    <div class="level-nav">
+      <button class="nav-btn" data-goto="3">◂ Back</button>
+      <button class="nav-btn primary" data-goto="5">Continue ▸</button>
+    </div>
+  </section>
+
+  <!-- LEVEL 5 -->
+  <section class="level-panel" id="level-5" data-level="5" data-title="Power Ups">
+    <div class="panel-scroll">
+      <div class="eyebrow">Level 5 · Power Ups</div>
+      <div class="objective-tag"><span class="num">5</span> THE THINGS I'M WEIRDLY GOOD AT</div>
+      <h2 class="serif">Abilities unlocked</h2>
+      <p class="lede">Not the polished LinkedIn version. Just the little things that make life easier for me.</p>
+      <div class="power-grid">
+        <div class="power-card glass-card"><div class="power-icon">🔍</div><h3>Curious By Default</h3><p>I rarely leave "I wonder…" alone. It usually becomes a puzzle, hobby, trip or mildly unnecessary experiment.</p></div>
+        <div class="power-card glass-card"><div class="power-icon">🎨</div><h3>Make It Interesting</h3><p>Give me an ordinary idea and I'll probably wonder how to make it prettier, tinier, stranger or more fun.</p></div>
+        <div class="power-card glass-card"><div class="power-icon">🧩</div><h3>Figure It Out</h3><p>I genuinely enjoy figuring things out, especially when the answer isn't obvious and giving up would be less satisfying.</p></div>
+        <div class="power-card glass-card"><div class="power-icon">💭</div><h3>Notice The Little Things</h3><p>I remember tiny details about people, which is probably why I'd rather make someone a little gift than just buy one.</p></div>
+        <div class="power-card glass-card"><div class="power-icon">🌊</div><h3>Roll With It</h3><p>Plans change, things go sideways, and I've learned that "okay, let's work with this" usually works better than panicking.</p></div>
+      </div>
+    </div>
+    <div class="level-nav">
+      <button class="nav-btn" data-goto="4">◂ Back</button>
+      <button class="nav-btn primary" data-goto="6">Continue ▸</button>
+    </div>
+  </section>
+
+  <!-- LEVEL 6 -->
+  <section class="level-panel" id="level-6" data-level="6" data-title="Patch Notes">
+    <div class="panel-scroll">
+      <div class="eyebrow">Level 6 · Patch Notes</div>
+      <div class="objective-tag"><span class="num">6</span> THE BUGS I'M STILL FIXING</div>
+      <h2 class="serif">Known issues & patches in progress</h2>
+      <p class="lede">Every character has bugs. Here's mine, filed honestly, with a fix already underway.</p>
+      <div class="patch">
+        <div class="patch-entry glass-card" style="padding:14px 18px;">
+          <div class="patch-version">Overthinking v1.0</div>
+          <span class="patch-tag">PATCH IN PROGRESS</span>
+          <p>My brain has a habit of turning one small thought into a full committee meeting. I'm learning to ask myself, "Does this actually need another 47 rounds of analysis?"</p>
+          <p class="patch-tiny">Current status: still loading…</p>
+        </div>
+        <div class="patch-entry glass-card" style="padding:14px 18px;">
+          <div class="patch-version">Perfectionism v1.2</div>
+          <span class="patch-tag">PATCH IN PROGRESS</span>
+          <p>I can spend far too long fixing a tiny detail nobody else would have noticed. I'm getting better at recognising when "done and good" beats "perfect and never finished."</p>
+          <p class="patch-tiny">One more tiny adjustment… famous last words.</p>
+        </div>
+        <div class="patch-entry glass-card" style="padding:14px 18px;">
+          <div class="patch-version">"I'll Do It" v0.9</div>
+          <span class="patch-tag">PATCH IN PROGRESS</span>
+          <p>I get excited by new ideas and opportunities, so my instinct is often "sure, why not?" I'm learning that having 12 tabs open in life doesn't mean I need to keep opening more.</p>
+          <p class="patch-tiny">Current inventory: full. Still tempted to add more.</p>
+        </div>
+      </div>
+      <div class="patch-status">
+        <div class="patch-status-label">PATCH STATUS: 68% COMPLETE</div>
+        <div class="patch-status-track"><div class="patch-status-fill"></div></div>
+        <p class="patch-tiny" style="margin-top:8px;">Still working on it. Please don't expect version 2.0 tomorrow. 😭</p>
+      </div>
+    </div>
+    <div class="level-nav">
+      <button class="nav-btn" data-goto="5">◂ Back</button>
+      <button class="nav-btn primary" data-goto="7">Continue ▸</button>
+    </div>
+  </section>
+
+  <!-- LEVEL 7 -->
+  <section class="l7 level-panel" id="level-7" data-level="7" data-title="Bonus Level">
+    <div class="panel-scroll">
+      <div class="eyebrow">Level 7 · Bonus Level (Secret)</div>
+      <div class="objective-tag"><span class="num">7</span> THE STUFF I DIDN'T PUT ON MY RÉSUMÉ</div>
+      <h2 class="serif">You made it to the hidden room</h2>
+      <p class="lede" style="margin:0 auto;">You found the part of the game I wasn't going to put on my résumé.</p>
+
+      <div class="fact-grid" id="factGrid"></div>
+
+      <div class="level-complete glass-card">
+        <div class="lc-label">✨ LEVEL COMPLETE</div>
+        <h3 class="serif lc-heading">DIYA HAS BEEN UNLOCKED</h3>
+        <div class="lc-badges">
+          <span class="achv-tag">🔍 Curious</span>
+          <span class="achv-tag">🎨 Creative</span>
+          <span class="achv-tag">🧩 Puzzle Person</span>
+          <span class="achv-tag">🎲 Board Game Enthusiast</span>
+          <span class="achv-tag">✈️ Always Up For A Trip</span>
+          <span class="achv-tag">💡 "I Have An Idea…"</span>
+        </div>
+      </div>
+
+      <div class="player-photo-wrap">
+        <div class="player-photo">
+          <img src="images/profile/sticker.png" alt="Diya" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'player-photo-fallback',textContent:'📷'}))">
+        </div>
+        <div class="player-photo-caption"><strong>PLAYER FOUND IRL.</strong></div>
+      </div>
+
+      <div class="final-message">
+        <p class="lede" style="margin:0 auto;">You've seen the puzzles, tiny things, rangolis, food experiments, competitive side, travel stories and occasional overthinking.</p>
+        <p class="lede" style="margin:8px auto 0;">And somehow, you're still here. Respect. 👀</p>
+        <p class="closing serif final-punchline">This is where the game ends. My hobbies, unfortunately, do not.</p>
+        <p class="final-goodbye">Thanks for playing. Hope you had as much fun exploring as I had making it. ✦</p>
+        <button class="nav-btn primary" data-goto="1" style="margin:16px auto 6px;">↻ PLAY AGAIN</button>
+        <p class="patch-tiny" style="text-align:center;">Warning: replaying may result in discovering another hobby.</p>
+      </div>
+    </div>
+    <div class="level-nav">
+      <button class="nav-btn" data-goto="6">◂ Back</button>
+      <button class="nav-btn primary" data-goto="1">↺ Play Again</button>
+    </div>
+    <p class="site-footer-note">DIYA.EXE: a Creative CV built for L'Oréal Internships. Traditional résumé available separately. Thank you for playing.</p>
+  </section>
+
+</main>
+
+<!-- DEVELOPER COMMENTARY / EASTER EGG MODAL -->
+<div class="modal-overlay" id="easterEggModal">
+  <div class="modal" style="max-width:400px; text-align:center;">
+    <button class="modal-close" id="easterEggClose" aria-label="Close">✕</button>
+    <div class="modal-frame">👀</div>
+    <h3 class="serif" style="margin-bottom:12px;">You unlocked the developer commentary.</h3>
+    <p style="font-size:13px; color:var(--ink-soft); margin-bottom:8px;">Thanks for clicking around.</p>
+    <p style="font-size:13px; font-weight:700; color:var(--gold-deep);">You seem like my kind of person. 👀</p>
+  </div>
+</div>
+
+<div class="toast-stack" id="toastStack" aria-live="polite"></div>
+
+<script>
+(function(){
+  const levels = [
+    {n:1, title:"Character Creation"},
+    {n:2, title:"Inventory"},
+    {n:3, title:"Beauty Lab"},
+    {n:4, title:"Brand Match"},
+    {n:5, title:"Power Ups"},
+    {n:6, title:"Patch Notes"},
+    {n:7, title:"Bonus Level"},
+  ];
+  const reached = new Set();
+
+  // ---------- HUD PIPS ----------
+  const pipRow = document.getElementById('pipRow');
+  levels.forEach(l=>{
+    const b = document.createElement('button');
+    b.className = 'pip';
+    b.textContent = l.n;
+    b.dataset.level = l.n;
+    b.setAttribute('aria-label', 'Go to ' + l.title);
+    b.addEventListener('click', ()=> switchLevel(l.n));
+    pipRow.appendChild(b);
+  });
+
+  function updateHUD(currentTitle, currentN){
+    document.getElementById('questFill').style.width = Math.min(100, (reached.size/levels.length)*100) + '%';
+    document.getElementById('questLabel').textContent = 'LEVEL ' + currentN + ' / 7';
+    document.querySelectorAll('.pip').forEach(p=>{
+      const n = Number(p.dataset.level);
+      p.classList.toggle('done', reached.has(n));
+      p.classList.toggle('active', n===currentN);
+    });
+    document.querySelectorAll('.brief-list li').forEach(li=>{
+      li.classList.toggle('done', reached.has(Number(li.dataset.level)));
+    });
+  }
+
+  // ---------- BRIEF MODAL ----------
+  const questions = [
+    {q:'About You', sub:'A short introduction in your own style.'},
+    {q:'Your Passions', sub:'What excites and motivates you outside academics.'},
+    {q:'What Beauty Means to You', sub:'In your own words.'},
+    {q:"One L'Oréal Brand You Relate To Most", sub:'And why.'},
+    {q:'Your Strengths', sub:'Be honest and reflective.'},
+    {q:'Your Weaknesses', sub:'Be honest and reflective.'},
+    {q:'Memorable Experiences & Fun Facts', sub:'Creative storytelling, visuals, and personality.'},
+  ];
+  const briefList = document.getElementById('briefList');
+  questions.forEach((item, i)=>{
+    const li = document.createElement('li');
+    li.dataset.level = i+1;
+    li.innerHTML = '<div class="brief-check">✓</div><div><span class="brief-q">'+(i+1)+'. '+item.q+'</span><span class="brief-sub">'+item.sub+' - Level '+(i+1)+'</span></div>';
+    briefList.appendChild(li);
+  });
+  const briefModal = document.getElementById('briefModal');
+  document.getElementById('briefBtn').addEventListener('click', ()=>briefModal.classList.add('open'));
+  document.getElementById('briefModalClose').addEventListener('click', ()=>briefModal.classList.remove('open'));
+  briefModal.addEventListener('click', (e)=>{ if(e.target===briefModal) briefModal.classList.remove('open'); });
+
+  // ---------- TOASTS ----------
+  const toastStack = document.getElementById('toastStack');
+  function toast(title, body, icon){
+    const el = document.createElement('div');
+    el.className = 'toast';
+    el.innerHTML = '<div class="toast-icon">'+(icon||'✦')+'</div><div><div class="toast-title">'+title+'</div><div class="toast-body">'+body+'</div></div>';
+    toastStack.appendChild(el);
+    setTimeout(()=>{ el.classList.add('out'); setTimeout(()=>el.remove(),300); }, 4000);
+  }
+
+  // ---------- BADGE SHELF ----------
+  const badgeShelf = document.getElementById('badgeShelf');
+  function addBadge(icon){
+    const b = document.createElement('div');
+    b.className = 'badge';
+    b.textContent = icon;
+    badgeShelf.appendChild(b);
+  }
+
+  // ---------- LEVEL SWITCHING ----------
+  const panels = {};
+  document.querySelectorAll('main .level-panel[data-level]').forEach(p=>{
+    panels[p.dataset.level] = p;
+  });
+  let currentLevel = null;
+
+  function markReached(n, title){
+    if(!reached.has(n)){
+      reached.add(n);
+      toast('Level Unlocked', title, '★');
+      addBadge(['🌱','🎒','💧','💛','🦋','📝','🎉'][n-1]);
+    }
+  }
+
+  function switchLevel(n){
+    n = String(n);
+    if(n === currentLevel) return;
+    const next = panels[n];
+    if(!next) return;
+    const prev = currentLevel ? panels[currentLevel] : null;
+
+    // Activate the new panel
+    next.classList.add('active');
+    void next.offsetWidth;
+    next.classList.add('show');
+    
+    // Reset scroll position
+    const scrollArea = next.querySelector('.panel-scroll');
+    if(scrollArea) scrollArea.scrollTop = 0;
+
+    if(prev && prev !== next){
+      prev.classList.remove('show');
+      setTimeout(()=>{ 
+        if(!prev.classList.contains('show')) {
+          prev.classList.remove('active');
+        }
+      }, 420);
+    }
+
+    currentLevel = n;
+    const title = next.dataset.title;
+    updateHUD(title, Number(n));
+    markReached(Number(n), title);
+
+    if(n === '1'){
+      document.querySelectorAll('.stat-fill').forEach(f=> f.style.width = f.dataset.value + '%');
+    }
+  }
+
+  document.querySelectorAll('.nav-btn[data-goto]').forEach(btn=>{
+    btn.addEventListener('click', ()=> switchLevel(btn.dataset.goto));
+  });
+
+  // ---------- LEVEL 2: INVENTORY ----------
+  const items = [
+    // Row 1
+    {
+      glyph:'✈️', 
+      name:'Travel', 
+      tag:'tap to open',
+      desc:'Home is nice. But have you tried going somewhere?<br><br>I love being outdoors, discovering new places, getting a little lost, trying new things and collecting stories along the way.<br><br>For me, the best part of travelling is never really knowing what the day will bring. The unexpected detours usually make the best memories.',
+      photos:["images/travel/1.jpeg", "images/travel/2.jpeg", "images/travel/3.jpeg", "images/travel/4.jpeg", "images/travel/5.jpeg"]
+    },
+    {
+      glyph:'🎲', 
+      name:'Board Games', 
+      tag:'tap to open',
+      desc:'I came for the game. I stayed because apparently I need to win.<br><br>I love board games because apparently friendship is more fun when there\'s a scoreboard involved.<br><br>I like the strategy, the chaos, the ridiculous negotiations and that magical moment when everyone suddenly becomes very serious about a tiny piece of cardboard.<br><br>"One last game?" has historically been a lie.',
+      photos:["images/board games/1.jpeg"]
+    },
+    {
+      glyph:'🧩', 
+      name:'Puzzles', 
+      tag:'tap to open',
+      desc:'I enjoy problems that voluntarily come in puzzle form.<br><br>I genuinely enjoy making my brain work harder than it needs to. Give me a puzzle and I\'ll happily sit there until something clicks.<br><br>I also love making puzzles because watching someone go from "this is impossible" → "WAIT, I GOT IT" is ridiculously satisfying.<br><br>Basically, I like problems that come with an invitation to solve them.',
+      photos:["images/puzzles/1.jpeg", "images/puzzles/2.jpeg", "images/puzzles/3.jpeg"]
+    },
+    {
+      glyph:'🧸', 
+      name:'Tiny Things', 
+      tag:'tap to open',
+      desc:'If it is tiny, unnecessary and cute, I probably want it.<br><br>I have a miniature eraser collection. Yes, this is a real sentence. I also make cute tiny handmade gifts because I love turning small things into very personal gestures.<br><br>It\'s not really about making things tiny: it\'s about making something that says, "I saw this and thought of you." And apparently, I prefer delivering that message in miniature.<br><br>I have no explanation for my obsession with tiny things. I just know that if something is cute, detailed and completely unnecessary, I\'m probably interested.',
+      photos:["images/tiny things/1.jpeg", "images/tiny things/2.jpeg", "images/tiny things/3.jpeg", "images/tiny things/4.jpeg", "images/tiny things/5.jpeg"]
+    },
+    // Row 2
+    {
+      glyph:'🪔',
+      name:'Colour & Rhythm',
+      tag:'tap to open',
+      desc:'Basically: I make pretty circles and then spend hours dancing in them.<br><br>As a Gujarati, I\'m pretty sure Garba came pre-installed. 😌<br><br>Making Rangoli brings out my quiet, detail-obsessed side: colours, patterns, symmetry and hours spent getting one tiny bit just right.<br><br>By the end, the rangoli looks beautiful, the floor looks happy, and my back is filing a formal complaint.<br><br>Then the Garba music starts and somehow I\'m ready to dance for another few hours. Apparently, sitting on the floor for hours and then dancing for hours is my idea of balance. 💃',
+      photos:["images/color and rhythm/1.jpeg", "images/color and rhythm/2.jpeg", "images/color and rhythm/3.jpeg"]
+    },
+    {
+      glyph:'🍳', 
+      name:'Food', 
+      tag:'tap to open',
+      desc:'Food first. Questions later.<br><br>I will happily plan my day around food. I love trying new things, discovering good places to eat and, occasionally, thinking "I could probably make this better."<br><br>Sometimes I\'m right. Sometimes I\'ve just created a very expensive learning experience. Either way, I\'m eating it.<br><br>And yes, someone still has to do the dishes.',
+      photos:["images/food/1.jpeg", "images/food/2.jpeg", "images/food/3.jpeg", "images/food/4.jpeg", "images/food/5.jpeg"]
+    },
+    {
+      glyph:'🏸', 
+      name:'Sports', 
+      tag:'tap to open',
+      desc:'Badminton brings out my competitive side. Swimming brings it back down.<br><br>🏸 Badminton: I\'m here for fun, friendship and healthy competition. Until I start losing. Then friendship can wait.<br><br>🏊 Swimming: Basically a reset button for my brain: no overthinking, no notifications, just me and the water.<br><br>Different sports, very different versions of me.',
+      photos:["images/sports/1.jpeg", "images/sports/2.jpeg", "images/sports/3.jpeg", "images/sports/4.jpeg"]
+    },
+    {
+      glyph:'💡', 
+      name:'"I Have An Idea…"', 
+      tag:'tap to open',
+      desc:'The four words behind an unreasonable number of my hobbies.<br><br>My hobbies rarely begin with a sensible plan. They usually begin with me seeing something and thinking, "I could make that."<br><br>One puzzle becomes another. One tiny gift becomes a miniature collection. One recipe becomes "okay, but what if I change this?" And somehow a casual idea has become a full-blown project.<br><br>I don\'t think I\'m very good at leaving an interesting idea alone. And honestly, I don\'t want to be.',
+      photos:["images/i have an idea/1.jpeg", "images/i have an idea/2.jpeg", "images/i have an idea/3.jpeg"]
+    },
+  ];
+  const invGrid = document.getElementById('invGrid');
+  items.forEach((it, idx)=>{
+    const card = document.createElement('div');
+    card.className = 'inv-item glass-card';
+    card.tabIndex = 0;
+    card.innerHTML = '<div class="inv-frame">'+it.glyph+'</div><div class="inv-name">'+it.name+'</div><div class="inv-tag">'+it.tag+'</div>';
+    card.addEventListener('click', ()=>openInv(idx));
+    card.addEventListener('keypress', (e)=>{ if(e.key==='Enter') openInv(idx); });
+    invGrid.appendChild(card);
+  });
+  const invModal = document.getElementById('invModal');
+  let invOpened = 0;
+
+  // Carousel state
+  let carouselIndex = 0;
+  const carouselTrack = document.getElementById('carouselTrack');
+  const carouselDots = document.getElementById('carouselDots');
+  const carouselWrap = document.getElementById('invCarousel');
+  const carouselPrev = document.getElementById('carouselPrev');
+  const carouselNext = document.getElementById('carouselNext');
+
+  function buildCarousel(photos){
+    carouselTrack.innerHTML = '';
+    carouselDots.innerHTML = '';
+    if(!photos || photos.length === 0){
+      carouselWrap.style.display = 'none';
+      return;
+    }
+    carouselWrap.style.display = 'block';
+    photos.forEach((src, i)=>{
+      const slide = document.createElement('div');
+      slide.className = 'carousel-slide';
+      slide.innerHTML = '<img src="'+src+'" alt="Photo '+(i+1)+'" loading="lazy">';
+      carouselTrack.appendChild(slide);
+      const dot = document.createElement('button');
+      dot.className = 'carousel-dot'+(i===0?' active':'');
+      dot.setAttribute('aria-label', 'Go to photo '+(i+1));
+      dot.addEventListener('click', ()=>{ goToSlide(i); });
+      carouselDots.appendChild(dot);
+    });
+    carouselIndex = 0;
+    goToSlide(0);
+  }
+
+  function goToSlide(n){
+    const slides = carouselTrack.querySelectorAll('.carousel-slide');
+    if(!slides.length) return;
+    carouselIndex = Math.max(0, Math.min(n, slides.length-1));
+    carouselTrack.style.transform = 'translateX(-'+(carouselIndex*100)+'%)';
+    carouselDots.querySelectorAll('.carousel-dot').forEach((d,i)=>{
+      d.classList.toggle('active', i===carouselIndex);
+    });
+  }
+
+  carouselPrev.addEventListener('click', ()=>{
+    const slides = carouselTrack.querySelectorAll('.carousel-slide');
+    goToSlide(carouselIndex-1);
+  });
+  carouselNext.addEventListener('click', ()=>{
+    goToSlide(carouselIndex+1);
+  });
+
+  function openInv(idx){
+    const it = items[idx];
+    document.getElementById('invModalFrame').textContent = it.glyph;
+    document.getElementById('invModalName').textContent = it.name;
+    document.getElementById('invModalDesc').innerHTML = it.desc;
+    buildCarousel(it.photos);
+    invModal.classList.add('open');
+    invOpened++;
+    if(invOpened === 3) toast('Achievement Unlocked', 'Curious Explorer - opened 3 inventory items', '🎒');
+    if(invOpened === items.length) toast('Achievement Unlocked', 'Full Inventory - every item explored', '🏅');
+  }
+  document.getElementById('invModalClose').addEventListener('click', ()=>invModal.classList.remove('open'));
+  invModal.addEventListener('click', (e)=>{ if(e.target===invModal) invModal.classList.remove('open'); });
+
+  // ---------- LEVEL 3: BEAUTY LAB ----------
+  const orbs = document.querySelectorAll('.orb');
+  const litSet = new Set();
+  const beautyReveal = document.getElementById('beautyReveal');
+  orbs.forEach(orb=>{
+    orb.addEventListener('click', ()=>{
+      orb.classList.add('lit');
+      litSet.add(orb.dataset.orb);
+      if(litSet.size === orbs.length){
+        beautyReveal.classList.add('show');
+        toast('Achievement Unlocked', 'Beauty Decoded - all three elements lit', '💫');
+      }
+    });
+  });
+
+  // ---------- LEVEL 4: MEMORY GAME ----------
+  const products = [
+    {id:'p1', src:'images/loreal products/1.webp', label:'Shampoo'},
+    {id:'p2', src:'images/loreal products/2.jpeg', label:'Serum'},
+    {id:'p3', src:'images/loreal products/3.webp', label:'Conditioner'},
+  ];
+  const memoryGrid = document.getElementById('memoryGrid');
+  const brandReveal = document.getElementById('brandReveal');
+  let memMoves = 0, memPairs = 0, memFirst = null, memLock = false, memSolved = false;
+
+  function buildMemoryGame(){
+    memoryGrid.innerHTML = '';
+    memMoves = 0; memPairs = 0; memFirst = null; memLock = false; memSolved = false;
+    document.getElementById('memMoves').textContent = '0';
+    document.getElementById('memPairs').textContent = '0';
+    brandReveal.classList.remove('show');
+
+    const deck = [...products, ...products].sort(()=>Math.random()-0.5);
+    deck.forEach(prod=>{
+      const card = document.createElement('div');
+      card.className = 'mem-card';
+      card.dataset.id = prod.id;
+      card.innerHTML =
+        '<div class="mem-inner">'+
+          '<div class="mem-face mem-front">?</div>'+
+          '<div class="mem-face mem-back">'+
+            '<img src="'+prod.src+'" alt="'+prod.label+'" onerror="this.replaceWith(Object.assign(document.createElement(\'div\'),{className:\'mem-fallback\',textContent:\'✨\'}))">'+
+          '</div>'+
+        '</div>';
+      card.addEventListener('click', ()=>flipMem(card));
+      memoryGrid.appendChild(card);
+    });
+  }
+
+  function flipMem(card){
+    if(memLock || memSolved || card.classList.contains('flipped') || card.classList.contains('matched')) return;
+    card.classList.add('flipped');
+    if(!memFirst){
+      memFirst = card;
+      return;
+    }
+    memMoves++;
+    document.getElementById('memMoves').textContent = memMoves;
+    memLock = true;
+    if(memFirst.dataset.id === card.dataset.id && memFirst !== card){
+      memFirst.classList.add('matched');
+      card.classList.add('matched');
+      memPairs++;
+      document.getElementById('memPairs').textContent = memPairs;
+      memFirst = null; memLock = false;
+      if(memPairs === products.length){
+        memSolved = true;
+        brandReveal.classList.add('show');
+        toast('Achievement Unlocked', "Match Found - L'Oréal Paris", '💛');
+      }
+    } else {
+      setTimeout(()=>{
+        memFirst.classList.remove('flipped');
+        card.classList.remove('flipped');
+        memFirst = null; memLock = false;
+      }, 700);
+    }
+  }
+  buildMemoryGame();
+
+  // ---------- LEVEL 7: THE FOUR SECRET UNLOCKS ----------
+  const facts = [
+    {
+      icon:'🔓', title:'THE PLAYER CARD',
+      teaser:'You made it this far. Obviously, you deserve a tiny reward.',
+      reveal:'PLAYER STATUS: UNLOCKED ✦<br><br>Curious? ✓<br>Creative? ✓<br>Slightly too many interests? ✓<br>Still figuring it out? Absolutely.'
+    },
+    {
+      icon:'🔓', title:'THE INVENTORY CHECK',
+      teaser:'Warning: inventory space is still unavailable.',
+      reveal:'CURRENT INVENTORY<br><br>🧩 Puzzles · 🎲 Board games · 🪔 Rangoli · ✨ Tiny things<br>🍜 Food · 🏸 Sports · ✈️ Travel · 💡 Ideas<br><br>Storage capacity: questionable.<br>Likelihood of acquiring another hobby: unfortunately high.'
+    },
+    {
+      icon:'🔓', title:'THE SECRET FORMULA',
+      teaser:'What seems like chaos is actually a system. Probably.',
+      reveal:'THE DIYA FORMULA ✦<br><br>CURIOSITY + CREATIVITY + "I HAVE AN IDEA…"<br>= DIYA<br><br>Add a little travel, a board game, some food and an unreasonable amount of enthusiasm.<br>Shake well.'
+    },
+    {
+      icon:'🔓', title:'THE FINAL LEVEL',
+      teaser:'Congratulations. You have officially met the non-résumé version of me.',
+      reveal:'✨ GAME COMPLETE<br><br>You\'ve unlocked:<br>01 The curious one<br>02 The maker<br>03 The overthinker<br>04 The "let\'s try it" person<br>05 The person who probably has another hobby waiting to happen<br><br>No further levels available.<br><span class="fact-forNow">For now.</span>'
+    },
+  ];
+  const factGrid = document.getElementById('factGrid');
+  facts.forEach(f=>{
+    const card = document.createElement('div');
+    card.className = 'fact-card glass-card';
+    card.innerHTML =
+      '<div class="fact-q"><span>'+f.icon+' '+f.title+'</span><span class="fact-toggle">+</span></div>'+
+      '<div class="fact-teaser">'+f.teaser+'</div>'+
+      '<div class="fact-a">'+f.reveal+'</div>';
+    card.addEventListener('click', ()=> card.classList.toggle('open'));
+    factGrid.appendChild(card);
+  });
+
+  // ---------- EASTER EGG ----------
+  let logoClicks = 0;
+  const logoEl = document.querySelector('.hud-logo');
+  const easterEggModal = document.getElementById('easterEggModal');
+  const easterEggClose = document.getElementById('easterEggClose');
+
+  logoEl.addEventListener('click', () => {
+    logoClicks++;
+    if (logoClicks === 5) {
+      easterEggModal.classList.add('open');
+      toast('Developer Commentary Unlocked', 'You found a secret!', '👀');
+      logoClicks = 0;
+    }
+  });
+
+  easterEggClose.addEventListener('click', () => {
+    easterEggModal.classList.remove('open');
+  });
+
+  easterEggModal.addEventListener('click', (e) => {
+    if (e.target === easterEggModal) {
+      easterEggModal.classList.remove('open');
+    }
+  });
+
+  switchLevel(1);
+})();
+</script>
+
+</body>
+</html>
